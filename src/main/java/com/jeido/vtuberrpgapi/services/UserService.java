@@ -55,6 +55,7 @@ public class UserService implements BaseService<UserDTOReceive, UserDTOSend> {
                 .username(userDTOReceive.getUsername())
                 .email(userDTOReceive.getEmail())
                 .password(userDTOReceive.getPassword())
+                .isAdmin(false)
                 .build()
         ));
     }

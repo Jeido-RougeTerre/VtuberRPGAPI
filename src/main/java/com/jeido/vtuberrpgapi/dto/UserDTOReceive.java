@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 public class UserDTOReceive {
     @NotNull
     @Size(min = 3, max = 25, message = "Username should be between 3 and 25 characters")
+    @Pattern(regexp = "^[a-z0-9_-]{3,25}$", message = "Username can have only English lower case letters, numbers, - and _ and be between 3 and 25 characters")
     private String username;
 
     @NotNull
