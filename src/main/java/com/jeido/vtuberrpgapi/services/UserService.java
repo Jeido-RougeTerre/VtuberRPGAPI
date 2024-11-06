@@ -1,5 +1,6 @@
 package com.jeido.vtuberrpgapi.services;
 
+import com.jeido.vtuberrpgapi.dto.UserDTOLogin;
 import com.jeido.vtuberrpgapi.dto.UserDTOReceive;
 import com.jeido.vtuberrpgapi.dto.UserDTOSend;
 import com.jeido.vtuberrpgapi.entites.User;
@@ -42,20 +43,20 @@ public class UserService implements BaseService<UserDTOReceive, UserDTOSend> {
 
     @Override
     public UserDTOSend create(UserDTOReceive userDTOReceive) {
-           if (existUsername(userDTOReceive.getUsername())) {
-               throw new UsernameAlreadyInDBException(userDTOReceive.getUsername());
-           }
+        if (existUsername(userDTOReceive.getUsername())) {
+            throw new UsernameAlreadyInDBException(userDTOReceive.getUsername());
+        }
 
-           if (existEmail(userDTOReceive.getEmail())) {
-               throw new EmailAlreadyInDBException(userDTOReceive.getEmail());
-           }
+        if (existEmail(userDTOReceive.getEmail())) {
+            throw new EmailAlreadyInDBException(userDTOReceive.getEmail());
+        }
 
-           return toDTOSend(userRepository.save(User.builder()
-                   .username(userDTOReceive.getUsername())
-                   .email(userDTOReceive.getEmail())
-                   .password(userDTOReceive.getPassword())
-                   .build()
-           ));
+        return toDTOSend(userRepository.save(User.builder()
+                .username(userDTOReceive.getUsername())
+                .email(userDTOReceive.getEmail())
+                .password(userDTOReceive.getPassword())
+                .build()
+        ));
     }
 
     @Override
@@ -126,5 +127,24 @@ public class UserService implements BaseService<UserDTOReceive, UserDTOSend> {
         if (!userRepository.existsById(id)) return false;
         userRepository.deleteById(id);
         return !userRepository.existsById(id);
+    }
+
+    public UserDTOSend login(UserDTOLogin userDTOLogin) {
+        String usernameOrEmail = userDTOLogin.getUsernameOrEmail();
+        String password = userDTOLogin.getPassword();
+
+        if (existUsername(usernameOrEmail) && userRepository.findByUsername(usernameOrEmail).stream().anyMatch(
+                user -> user.getPassword().equals(password)
+        )) {
+            return toDTOSend(userRepository.findByUsername(usernameOrEmail).get());
+        }
+
+        if (existEmail(usernameOrEmail) && userRepository.findByEmail(usernameOrEmail).stream().anyMatch(
+                user -> user.getPassword().equals(password)
+        )) {
+            return toDTOSend(userRepository.findByEmail(usernameOrEmail).get());
+        }
+
+        throw new InvalidLoginException();
     }
 }

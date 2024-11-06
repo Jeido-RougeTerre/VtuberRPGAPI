@@ -1,5 +1,6 @@
 package com.jeido.vtuberrpgapi.controllers;
 
+import com.jeido.vtuberrpgapi.dto.UserDTOLogin;
 import com.jeido.vtuberrpgapi.dto.UserDTOReceive;
 import com.jeido.vtuberrpgapi.dto.UserDTOSend;
 import com.jeido.vtuberrpgapi.services.UserService;
@@ -44,6 +45,11 @@ public class UserController {
     @DeleteMapping("{id}")
     public ResponseEntity<Boolean> delete(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.delete(id));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserDTOSend> login(@RequestBody @Valid UserDTOLogin userDTOLogin) {
+        return ResponseEntity.ok(userService.login(userDTOLogin));
     }
 
 }
