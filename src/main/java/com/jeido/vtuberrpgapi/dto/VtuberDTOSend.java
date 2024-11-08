@@ -12,14 +12,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDTOSend {
-    private UUID userId;
-
-    private String username;
-
-    private String email;
-
-    private boolean isAdmin;
-
-    private List<UUID> vtuberIds;
+public class VtuberDTOSend {
+    private UUID id;
+    private String name;
+    private List<UUID> userIds;
 }

@@ -1,26 +1,27 @@
 package com.jeido.vtuberrpgapi.services;
 
-import com.jeido.vtuberrpgapi.dto.UserDTOLogin;
-import com.jeido.vtuberrpgapi.dto.UserDTOReceive;
-import com.jeido.vtuberrpgapi.dto.UserDTOSend;
+import com.jeido.vtuberrpgapi.dto.*;
 import com.jeido.vtuberrpgapi.entites.User;
+import com.jeido.vtuberrpgapi.entites.Vtuber;
 import com.jeido.vtuberrpgapi.repositories.UserRepository;
+import com.jeido.vtuberrpgapi.repositories.VtuberRepository;
 import com.jeido.vtuberrpgapi.utils.exceptions.user.*;
+import com.jeido.vtuberrpgapi.utils.exceptions.vtuber.VtuberIdNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class UserService implements BaseService<UserDTOReceive, UserDTOSend> {
 
     private final UserRepository userRepository;
+    private final VtuberRepository vtuberRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, VtuberRepository vtuberRepository) {
         this.userRepository = userRepository;
+        this.vtuberRepository = vtuberRepository;
     }
 
     public UserDTOSend toDTOSend(User user) {
@@ -29,6 +30,7 @@ public class UserService implements BaseService<UserDTOReceive, UserDTOSend> {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .isAdmin(user.getIsAdmin() != null && user.getIsAdmin())
+                .vtuberIds(user.getVtubers().stream().map(Vtuber::getId).toList())
                 .build();
     }
 
@@ -147,5 +149,43 @@ public class UserService implements BaseService<UserDTOReceive, UserDTOSend> {
         }
 
         throw new InvalidLoginException();
+    }
+
+    public VtuberDTOSend addAndCreateVtuber(UUID userId, VtuberDTOReceive vtuberDTOReceive) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserIdNotFoundException(userId));
+
+        Vtuber vtuber = Vtuber.builder()
+                .name(vtuberDTOReceive.getName())
+                .users(Collections.singletonList(user))
+                .build();
+
+        Vtuber vtuberUpdated = vtuberRepository.save(vtuber);
+
+        return VtuberDTOSend.builder()
+                .id(vtuberUpdated.getId())
+                .name(vtuberUpdated.getName())
+                .userIds(vtuberUpdated.getUsers().stream().map(User::getId).toList())
+                .build();
+    }
+
+    public VtuberDTOSend addVtuber(UUID userId, UUID vtuberId) {
+        if (!userRepository.existsById(userId)) throw new UserIdNotFoundException(userId);
+
+        Vtuber vtuber = vtuberRepository.findById(vtuberId).orElseThrow( () -> new VtuberIdNotFoundException(vtuberId));
+
+        for (User user : vtuber.getUsers()) {
+            if (user.getId().equals(userId)) throw new VtuberAlreadyAssociatedException(userId, vtuberId);
+        }
+
+        vtuber.getUsers().add(userRepository.findById(userId).orElseThrow(() -> new UserIdNotFoundException(userId)));
+
+        Vtuber vtuberUpdated = vtuberRepository.save(vtuber);
+
+        return VtuberDTOSend.builder()
+                .id(vtuberUpdated.getId())
+                .name(vtuberUpdated.getName())
+                .userIds(vtuberUpdated.getUsers().stream().map(User::getId).toList())
+                .build();
+
     }
 }
