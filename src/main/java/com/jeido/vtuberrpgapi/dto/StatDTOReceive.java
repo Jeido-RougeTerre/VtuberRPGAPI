@@ -1,26 +1,24 @@
 package com.jeido.vtuberrpgapi.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class VtuberDTOReceive {
+@NoArgsConstructor
+@Builder
+public class StatDTOReceive {
     @NotNull
+    private UUID vtuberId;
     @NotEmpty
-    @NotBlank
-    private String name;
-
-    private List<UUID> userIds;
-    private List<StatDTOReceive> stats;
+    @Size(min = 1, max = 100)
+    private String label;
+    private String value = "";
 }

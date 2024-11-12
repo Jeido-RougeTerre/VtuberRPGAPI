@@ -30,5 +30,8 @@ public class Vtuber {
     )
     private List<User> users;
 
+    @OneToMany(mappedBy = "vtuber")
+    private List<Stat> stats;
+
 
 }

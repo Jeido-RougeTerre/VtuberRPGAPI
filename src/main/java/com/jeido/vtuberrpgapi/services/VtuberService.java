@@ -17,12 +17,14 @@ import java.util.*;
 public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSend> {
     private final VtuberRepository vtuberRepository;
     private final UserRepository userRepository;
+    private final StatService statService;
 
     public VtuberDTOSend toDTOSend(Vtuber vtuber) {
         return VtuberDTOSend.builder()
                 .id(vtuber.getId())
                 .name(vtuber.getName())
                 .userIds(vtuber.getUsers().stream().map(User::getId).toList())
+                .stats(statService.toDTOSend(vtuber.getStats()))
                 .build();
     }
 
@@ -35,9 +37,10 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
     }
 
     @Autowired
-    public VtuberService(VtuberRepository vtuberRepository, UserRepository userRepository) {
+    public VtuberService(VtuberRepository vtuberRepository, UserRepository userRepository, StatService statService) {
         this.vtuberRepository = vtuberRepository;
         this.userRepository = userRepository;
+        this.statService = statService;
     }
 
     @Override
@@ -95,7 +98,15 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
     @Override
     public boolean delete(UUID id) {
         if (!vtuberRepository.existsById(id)) return false;
+        Vtuber vtuber = vtuberRepository.findById(id).orElse(null);
+        List<User> users = userRepository.findAllByVtubersContains(vtuber);
+        for (User user : users) {
+            if (user.getVtubers().remove(vtuber)) {
+                userRepository.save(user);
+            }
+        }
         vtuberRepository.deleteById(id);
+        statService.delete(id);
         return !vtuberRepository.existsById(id);
     }
 
