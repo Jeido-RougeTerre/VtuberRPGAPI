@@ -24,5 +24,5 @@ public class StatDTOReceiveFull {
     @Pattern(regexp = "^[a-z0-9_-]{3,25}$", message = "Label can have only English lower case letters, numbers, - and _ and be between 3 and 25 characters")
     private String label;
 
-    private String value = "";
+    private String value;
 }

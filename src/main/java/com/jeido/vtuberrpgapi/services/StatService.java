@@ -8,7 +8,6 @@ import com.jeido.vtuberrpgapi.entites.Stat;
 import com.jeido.vtuberrpgapi.entites.keys.StatCompositeKey;
 import com.jeido.vtuberrpgapi.repositories.StatRepository;
 import com.jeido.vtuberrpgapi.repositories.VtuberRepository;
-import com.jeido.vtuberrpgapi.utils.exceptions.stat.CanNotChangeVtuberIDException;
 import com.jeido.vtuberrpgapi.utils.exceptions.stat.StatNotFoundException;
 import com.jeido.vtuberrpgapi.utils.exceptions.stat.StatLabelForVtuberIdAlreadyInDBException;
 import com.jeido.vtuberrpgapi.utils.exceptions.vtuber.VtuberIdNotFoundException;
@@ -107,11 +106,13 @@ public class StatService {
         Stat statToUpdate = statRepository.findById(key).orElseThrow(() -> new StatNotFoundException(label, vtuberId));
 
         if (statDTOReceiveLess.getLabel() != null && !statDTOReceiveLess.getLabel().equals(statToUpdate.getId().getLabel())) {
-
-            if (statRepository.findById(key).isPresent()) {
+            StatCompositeKey newKey = new StatCompositeKey(vtuberRepository.findById(vtuberId).get(), statDTOReceiveLess.getLabel());
+            if (statRepository.findById(newKey).isPresent()) {
                 throw new StatLabelForVtuberIdAlreadyInDBException(statDTOReceiveLess.getLabel(), vtuberId);
             }
-            statToUpdate.getId().setLabel(statDTOReceiveLess.getLabel());
+            statToUpdate.setId(newKey);
+            statToUpdate.setValue(statToUpdate.getValue());
+            statRepository.deleteById(key);
         }
 
         if (statDTOReceiveLess.getValue() != null && !statDTOReceiveLess.getValue().equals(statToUpdate.getValue())) {

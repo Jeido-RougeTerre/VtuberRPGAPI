@@ -14,5 +14,5 @@ public class StatDTOReceiveLess {
 
     @Size(min = 3, max = 25, message = "Label should be between 3 and 25 characters")
     private String label;
-    private String value = "";
+    private String value;
 }
