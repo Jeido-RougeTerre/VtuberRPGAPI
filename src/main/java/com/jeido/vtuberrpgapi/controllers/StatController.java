@@ -1,12 +1,14 @@
 package com.jeido.vtuberrpgapi.controllers;
 
-import com.jeido.vtuberrpgapi.dto.StatDTOReceive;
+import com.jeido.vtuberrpgapi.dto.StatDTOReceiveFull;
+import com.jeido.vtuberrpgapi.dto.StatDTOReceiveLess;
 import com.jeido.vtuberrpgapi.dto.StatDTOSendFull;
 import com.jeido.vtuberrpgapi.dto.StatDTOSendLess;
 import com.jeido.vtuberrpgapi.services.StatService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,8 +30,8 @@ public class StatController {
     }
 
     @PostMapping
-    public ResponseEntity<StatDTOSendFull> createStat(@Valid @RequestBody StatDTOReceive statDTOReceive) {
-        return new ResponseEntity<>(statService.create(statDTOReceive), HttpStatus.CREATED);
+    public ResponseEntity<StatDTOSendFull> createStat(@Validated @Valid @RequestBody StatDTOReceiveFull statDTOReceiveFull) {
+        return new ResponseEntity<>(statService.create(statDTOReceiveFull), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -53,15 +55,13 @@ public class StatController {
     }
 
     @PutMapping("/{id}/{label}")
-    public ResponseEntity<StatDTOSendFull> updateStat(@PathVariable("id") UUID vtuberID, @PathVariable("label") String label, @Valid @RequestBody StatDTOReceive statDTOReceive) {
-        return ResponseEntity.ok(statService.update(label, vtuberID, statDTOReceive));
+    public ResponseEntity<StatDTOSendFull> updateStat(@PathVariable("id") UUID vtuberID, @PathVariable("label") String label, @Valid @RequestBody StatDTOReceiveLess statDTOReceiveLess) {
+        return ResponseEntity.ok(statService.update(label, vtuberID, statDTOReceiveLess));
     }
 
     @DeleteMapping("/{id}/{label}")
     public ResponseEntity<Boolean> deleteStat(@PathVariable("id") UUID vtuberID, @PathVariable("label") String label) {
         return ResponseEntity.ok(statService.delete(label, vtuberID));
     }
-
-
 
 }
