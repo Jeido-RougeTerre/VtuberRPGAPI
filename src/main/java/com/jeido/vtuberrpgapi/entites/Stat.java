@@ -14,16 +14,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(StatCompositeKey.class)
 public class Stat {
-
-    @ManyToOne
-    @JoinColumn(name = "vtuber_id")
-    @Id
-    private Vtuber vtuber;
-
-    @Id
-    private String label;
+    @EmbeddedId
+    @AttributeOverrides({
+            @AttributeOverride(name = "vtuber", column = @Column(name = "vtuber_id", insertable = false, updatable = false)),
+            @AttributeOverride(name = "label", column = @Column(name = "label", insertable = false, updatable = false))
+    })
+    private StatCompositeKey id;
 
     private String value;
 

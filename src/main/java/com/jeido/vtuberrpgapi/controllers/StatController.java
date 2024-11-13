@@ -1,7 +1,8 @@
 package com.jeido.vtuberrpgapi.controllers;
 
 import com.jeido.vtuberrpgapi.dto.StatDTOReceive;
-import com.jeido.vtuberrpgapi.dto.StatDTOSend;
+import com.jeido.vtuberrpgapi.dto.StatDTOSendFull;
+import com.jeido.vtuberrpgapi.dto.StatDTOSendLess;
 import com.jeido.vtuberrpgapi.services.StatService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -22,17 +23,17 @@ public class StatController {
     }
 
     @GetMapping
-    public ResponseEntity<List<StatDTOSend>> getAllStats() {
+    public ResponseEntity<List<StatDTOSendFull>> getAllStats() {
         return ResponseEntity.ok(statService.findAll());
     }
 
     @PostMapping
-    public ResponseEntity<StatDTOSend> createStat(@Valid @RequestBody StatDTOReceive statDTOReceive) {
+    public ResponseEntity<StatDTOSendFull> createStat(@Valid @RequestBody StatDTOReceive statDTOReceive) {
         return new ResponseEntity<>(statService.create(statDTOReceive), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<StatDTOSend>> getStatByVtuberID(@PathVariable("id") UUID vtuberID) {
+    public ResponseEntity<List<StatDTOSendLess>> getStatByVtuberID(@PathVariable("id") UUID vtuberID) {
         return ResponseEntity.ok(statService.findByVtuberId(vtuberID));
     }
 
@@ -42,18 +43,23 @@ public class StatController {
     }
 
     @GetMapping("/{id}/{label}")
-    public ResponseEntity<StatDTOSend> getStatForVtuberID(@PathVariable("id") UUID vtuberID, @PathVariable("label") String label) {
+    public ResponseEntity<String> getStatForVtuberID(@PathVariable("id") UUID vtuberID, @PathVariable("label") String label) {
         return ResponseEntity.ok(statService.findByVtuberIdAndLabel(vtuberID, label));
     }
 
     @PostMapping("/{id}/{label}")
-    public ResponseEntity<StatDTOSend> createStat(@PathVariable("id") UUID vtuberID, @PathVariable("label") String label) {
+    public ResponseEntity<StatDTOSendFull> createStat(@PathVariable("id") UUID vtuberID, @PathVariable("label") String label) {
         return new ResponseEntity<>(statService.create(vtuberID, label), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}/{label}")
-    public ResponseEntity<StatDTOSend> updateStat(@PathVariable("id") UUID vtuberID, @PathVariable("label") String label, @Valid @RequestBody StatDTOReceive statDTOReceive) {
+    public ResponseEntity<StatDTOSendFull> updateStat(@PathVariable("id") UUID vtuberID, @PathVariable("label") String label, @Valid @RequestBody StatDTOReceive statDTOReceive) {
         return ResponseEntity.ok(statService.update(label, vtuberID, statDTOReceive));
+    }
+
+    @DeleteMapping("/{id}/{label}")
+    public ResponseEntity<Boolean> deleteStat(@PathVariable("id") UUID vtuberID, @PathVariable("label") String label) {
+        return ResponseEntity.ok(statService.delete(label, vtuberID));
     }
 
 

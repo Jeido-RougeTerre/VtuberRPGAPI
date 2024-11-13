@@ -24,7 +24,7 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
                 .id(vtuber.getId())
                 .name(vtuber.getName())
                 .userIds(vtuber.getUsers().stream().map(User::getId).toList())
-                .stats(statService.toDTOSend(vtuber.getStats()))
+                .stats(statService.toDTOSendLess(vtuber.getStats()))
                 .build();
     }
 

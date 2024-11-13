@@ -30,7 +30,7 @@ public class Vtuber {
     )
     private List<User> users;
 
-    @OneToMany(mappedBy = "vtuber")
+   @OneToMany(mappedBy = "id.vtuber")
     private List<Stat> stats;
 
 

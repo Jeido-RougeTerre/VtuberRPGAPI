@@ -16,5 +16,5 @@ public class VtuberDTOSend {
     private UUID id;
     private String name;
     private List<UUID> userIds;
-    private List<StatDTOSend> stats;
+    private List<StatDTOSendLess> stats;
 }
