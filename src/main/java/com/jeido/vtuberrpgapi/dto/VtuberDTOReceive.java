@@ -22,4 +22,5 @@ public class VtuberDTOReceive {
     private String name;
 
     private List<UUID> userIds;
+    private List<StatDTOReceiveFull> stats;
 }

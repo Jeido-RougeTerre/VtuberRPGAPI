@@ -25,12 +25,17 @@ public class UserService implements BaseService<UserDTOReceive, UserDTOSend> {
     }
 
     public UserDTOSend toDTOSend(User user) {
+        List<UUID> vtuberIds = new ArrayList<>();
+        if (user.getVtubers() != null) {
+            vtuberIds = user.getVtubers().stream().map(Vtuber::getId).toList();
+        }
+
         return UserDTOSend.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .isAdmin(user.getIsAdmin() != null && user.getIsAdmin())
-                .vtuberIds(user.getVtubers().stream().map(Vtuber::getId).toList())
+                .vtuberIds(vtuberIds)
                 .build();
     }
 
