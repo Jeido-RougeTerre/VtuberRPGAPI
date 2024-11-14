@@ -5,7 +5,7 @@ import com.jeido.vtuberrpgapi.dto.StatDTOReceiveLess;
 import com.jeido.vtuberrpgapi.dto.StatDTOSendFull;
 import com.jeido.vtuberrpgapi.dto.StatDTOSendLess;
 import com.jeido.vtuberrpgapi.entites.Stat;
-import com.jeido.vtuberrpgapi.entites.keys.StatCompositeKey;
+import com.jeido.vtuberrpgapi.entites.keys.VtuberStringCompositeKey;
 import com.jeido.vtuberrpgapi.repositories.StatRepository;
 import com.jeido.vtuberrpgapi.repositories.VtuberRepository;
 import com.jeido.vtuberrpgapi.utils.exceptions.stat.StatNotFoundException;
@@ -63,11 +63,11 @@ public class StatService {
 
     public StatDTOSendFull create(StatDTOReceiveFull statDTOReceiveFull) {
         Stat statToSave = Stat.builder()
-                .id(new StatCompositeKey(vtuberRepository.findById(statDTOReceiveFull.getVtuberId()).orElseThrow(() -> new VtuberIdNotFoundException(statDTOReceiveFull.getVtuberId())),
+                .id(new VtuberStringCompositeKey(vtuberRepository.findById(statDTOReceiveFull.getVtuberId()).orElseThrow(() -> new VtuberIdNotFoundException(statDTOReceiveFull.getVtuberId())),
                 statDTOReceiveFull.getLabel()))
                 .value(statDTOReceiveFull.getValue())
                 .build();
-        if (statRepository.existsById(new StatCompositeKey(vtuberRepository.findById(statDTOReceiveFull.getVtuberId()).get(), statDTOReceiveFull.getLabel()))) {
+        if (statRepository.existsById(new VtuberStringCompositeKey(vtuberRepository.findById(statDTOReceiveFull.getVtuberId()).get(), statDTOReceiveFull.getLabel()))) {
             throw new StatLabelForVtuberIdAlreadyInDBException(statDTOReceiveFull.getLabel(), statDTOReceiveFull.getVtuberId());
         }
 
@@ -77,9 +77,9 @@ public class StatService {
 
     public StatDTOSendFull create(UUID vtuberId, String label) {
         if (vtuberRepository.findById(vtuberId).isEmpty()) throw new VtuberIdNotFoundException(vtuberId);
-        if (statRepository.existsById(new StatCompositeKey(vtuberRepository.findById(vtuberId).get(), label))) throw new StatLabelForVtuberIdAlreadyInDBException(label, vtuberId);
+        if (statRepository.existsById(new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId).get(), label))) throw new StatLabelForVtuberIdAlreadyInDBException(label, vtuberId);
         return toDTOSendFull(statRepository.save(Stat.builder()
-                        .id(new StatCompositeKey(vtuberRepository.findById(vtuberId).get(), label))
+                        .id(new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId).get(), label))
                 .value("")
                 .build()
         ));
@@ -96,17 +96,17 @@ public class StatService {
 
     public String findByVtuberIdAndLabel(UUID vtuberId, String label) {
         if (!vtuberRepository.existsById(vtuberId)) throw new VtuberIdNotFoundException(vtuberId);
-        return statRepository.findById(new StatCompositeKey(vtuberRepository.findById(vtuberId).get(), label)).orElseThrow(() -> new StatLabelForVtuberIdAlreadyInDBException(label, vtuberId)).getValue();
+        return statRepository.findById(new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId).get(), label)).orElseThrow(() -> new StatLabelForVtuberIdAlreadyInDBException(label, vtuberId)).getValue();
     }
 
 
     public StatDTOSendFull update(String label, UUID vtuberId, StatDTOReceiveLess statDTOReceiveLess) {
-        StatCompositeKey key = new StatCompositeKey(vtuberRepository.findById(vtuberId)
+        VtuberStringCompositeKey key = new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId)
                 .orElseThrow(() -> new VtuberIdNotFoundException(vtuberId)), label);
         Stat statToUpdate = statRepository.findById(key).orElseThrow(() -> new StatNotFoundException(label, vtuberId));
 
         if (statDTOReceiveLess.getLabel() != null && !statDTOReceiveLess.getLabel().equals(statToUpdate.getId().getLabel())) {
-            StatCompositeKey newKey = new StatCompositeKey(vtuberRepository.findById(vtuberId).get(), statDTOReceiveLess.getLabel());
+            VtuberStringCompositeKey newKey = new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId).get(), statDTOReceiveLess.getLabel());
             if (statRepository.findById(newKey).isPresent()) {
                 throw new StatLabelForVtuberIdAlreadyInDBException(statDTOReceiveLess.getLabel(), vtuberId);
             }
@@ -122,7 +122,7 @@ public class StatService {
     }
 
     public boolean delete(String label, UUID vtuberId) {
-        StatCompositeKey key = new StatCompositeKey(vtuberRepository.findById(vtuberId)
+        VtuberStringCompositeKey key = new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId)
                 .orElseThrow(() -> new VtuberIdNotFoundException(vtuberId)), label);
         if (!statRepository.existsById(key)) return false;
         statRepository.deleteById(key);

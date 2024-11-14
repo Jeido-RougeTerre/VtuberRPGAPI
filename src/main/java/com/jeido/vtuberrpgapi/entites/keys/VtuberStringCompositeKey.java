@@ -14,7 +14,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Embeddable
 @NoArgsConstructor
-public class StatCompositeKey implements Serializable {
+public class VtuberStringCompositeKey implements Serializable {
     @ManyToOne
     @JoinColumn(name = "vtuber_id")
     private Vtuber vtuber;

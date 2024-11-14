@@ -9,19 +9,16 @@ import lombok.NoArgsConstructor;
 
 
 @Entity
-@Table(name = "stats")
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class Stat {
+@NoArgsConstructor
+@Table(name = "triggers")
+public class Trigger {
     @EmbeddedId
     @AttributeOverrides({
             @AttributeOverride(name = "vtuber", column = @Column(name = "vtuber_id", insertable = false, updatable = false)),
-            @AttributeOverride(name = "label", column = @Column(name = "label", insertable = false, updatable = false))
+            @AttributeOverride(name= "label", column = @Column(name= "label", insertable = false, updatable = false))
     })
     private VtuberStringCompositeKey id;
-
-    private String value;
-
 }
