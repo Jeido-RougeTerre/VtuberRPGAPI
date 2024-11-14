@@ -1,4 +1,4 @@
-package com.jeido.vtuberrpgapi.dto;
+package com.jeido.vtuberrpgapi.dto.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;

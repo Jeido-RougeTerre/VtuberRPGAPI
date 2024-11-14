@@ -1,6 +1,10 @@
 package com.jeido.vtuberrpgapi.services;
 
-import com.jeido.vtuberrpgapi.dto.*;
+import com.jeido.vtuberrpgapi.dto.user.UserDTOLogin;
+import com.jeido.vtuberrpgapi.dto.user.UserDTOReceive;
+import com.jeido.vtuberrpgapi.dto.user.UserDTOSend;
+import com.jeido.vtuberrpgapi.dto.vtuber.VtuberDTOReceive;
+import com.jeido.vtuberrpgapi.dto.vtuber.VtuberDTOSend;
 import com.jeido.vtuberrpgapi.entites.User;
 import com.jeido.vtuberrpgapi.entites.Vtuber;
 import com.jeido.vtuberrpgapi.repositories.UserRepository;

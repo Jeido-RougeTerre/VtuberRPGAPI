@@ -1,8 +1,8 @@
 package com.jeido.vtuberrpgapi.controllers;
 
-import com.jeido.vtuberrpgapi.dto.UserDTOLogin;
-import com.jeido.vtuberrpgapi.dto.UserDTOReceive;
-import com.jeido.vtuberrpgapi.dto.UserDTOSend;
+import com.jeido.vtuberrpgapi.dto.user.UserDTOLogin;
+import com.jeido.vtuberrpgapi.dto.user.UserDTOReceive;
+import com.jeido.vtuberrpgapi.dto.user.UserDTOSend;
 import com.jeido.vtuberrpgapi.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
