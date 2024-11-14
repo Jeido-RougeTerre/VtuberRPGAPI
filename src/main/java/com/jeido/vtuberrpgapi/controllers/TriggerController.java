@@ -1,7 +1,9 @@
 package com.jeido.vtuberrpgapi.controllers;
 
-import com.jeido.vtuberrpgapi.dto.TriggerDTOReceive;
-import com.jeido.vtuberrpgapi.dto.TriggerDTOSend;
+import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOReceiveFull;
+import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOReceiveLess;
+import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOSendFull;
+import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOSendLess;
 import com.jeido.vtuberrpgapi.services.TriggerService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -22,17 +24,17 @@ public class TriggerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TriggerDTOSend>> getTriggers() {
+    public ResponseEntity<List<TriggerDTOSendFull>> getTriggers() {
         return ResponseEntity.ok(triggerService.findAll());
     }
 
     @PostMapping
-    public ResponseEntity<TriggerDTOSend> createTrigger(@Valid @RequestBody TriggerDTOReceive triggerDTOReceive) {
-        return new ResponseEntity<>(triggerService.create(triggerDTOReceive), HttpStatus.CREATED);
+    public ResponseEntity<TriggerDTOSendFull> createTrigger(@Valid @RequestBody TriggerDTOReceiveFull triggerDTOReceiveFull) {
+        return new ResponseEntity<>(triggerService.create(triggerDTOReceiveFull), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<TriggerDTOSend>> getTriggerByVtuberID(@PathVariable("id") UUID id) {
+    public ResponseEntity<List<TriggerDTOSendLess>> getTriggerByVtuberID(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(triggerService.findByVtuberId(id));
     }
 
@@ -42,18 +44,18 @@ public class TriggerController {
     }
 
     @GetMapping("/{id}/{label}")
-    public ResponseEntity<TriggerDTOSend> findTrigger(@PathVariable("id") UUID id, @PathVariable("label") String label) {
+    public ResponseEntity<TriggerDTOSendLess> findTrigger(@PathVariable("id") UUID id, @PathVariable("label") String label) {
         return ResponseEntity.ok(triggerService.findByLabelAndVtuberId(label, id));
     }
 
     @PostMapping("/{id}/{label}")
-    public ResponseEntity<TriggerDTOSend> createTriggerForVtuberID(@PathVariable("id") UUID id, @PathVariable("label") String label) {
+    public ResponseEntity<TriggerDTOSendFull> createTriggerForVtuberID(@PathVariable("id") UUID id, @PathVariable("label") String label) {
         return new ResponseEntity<>(triggerService.create(id, label), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}/{label}")
-    public ResponseEntity<TriggerDTOSend> updateTrigger(@PathVariable("id") UUID id, @PathVariable("label") String label, @Valid @RequestBody TriggerDTOReceive triggerDTOReceive) {
-        return ResponseEntity.ok(triggerService.update(label, id, triggerDTOReceive));
+    public ResponseEntity<TriggerDTOSendFull> updateTrigger(@PathVariable("id") UUID id, @PathVariable("label") String label, @Valid @RequestBody TriggerDTOReceiveLess triggerDTOReceiveLess) {
+        return ResponseEntity.ok(triggerService.update(label, id, triggerDTOReceiveLess));
     }
 
     @DeleteMapping("/{id}/{label}")

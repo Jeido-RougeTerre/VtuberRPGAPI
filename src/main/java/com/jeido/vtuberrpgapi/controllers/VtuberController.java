@@ -1,7 +1,7 @@
 package com.jeido.vtuberrpgapi.controllers;
 
-import com.jeido.vtuberrpgapi.dto.VtuberDTOReceive;
-import com.jeido.vtuberrpgapi.dto.VtuberDTOSend;
+import com.jeido.vtuberrpgapi.dto.vtuber.VtuberDTOReceive;
+import com.jeido.vtuberrpgapi.dto.vtuber.VtuberDTOSend;
 import com.jeido.vtuberrpgapi.services.VtuberService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

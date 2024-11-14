@@ -1,9 +1,9 @@
 package com.jeido.vtuberrpgapi.services;
 
-import com.jeido.vtuberrpgapi.dto.StatDTOReceiveFull;
-import com.jeido.vtuberrpgapi.dto.StatDTOReceiveLess;
-import com.jeido.vtuberrpgapi.dto.StatDTOSendFull;
-import com.jeido.vtuberrpgapi.dto.StatDTOSendLess;
+import com.jeido.vtuberrpgapi.dto.stat.StatDTOReceiveFull;
+import com.jeido.vtuberrpgapi.dto.stat.StatDTOReceiveLess;
+import com.jeido.vtuberrpgapi.dto.stat.StatDTOSendFull;
+import com.jeido.vtuberrpgapi.dto.stat.StatDTOSendLess;
 import com.jeido.vtuberrpgapi.entites.Stat;
 import com.jeido.vtuberrpgapi.entites.keys.VtuberStringCompositeKey;
 import com.jeido.vtuberrpgapi.repositories.StatRepository;

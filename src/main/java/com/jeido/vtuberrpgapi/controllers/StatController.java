@@ -1,9 +1,9 @@
 package com.jeido.vtuberrpgapi.controllers;
 
-import com.jeido.vtuberrpgapi.dto.StatDTOReceiveFull;
-import com.jeido.vtuberrpgapi.dto.StatDTOReceiveLess;
-import com.jeido.vtuberrpgapi.dto.StatDTOSendFull;
-import com.jeido.vtuberrpgapi.dto.StatDTOSendLess;
+import com.jeido.vtuberrpgapi.dto.stat.StatDTOReceiveFull;
+import com.jeido.vtuberrpgapi.dto.stat.StatDTOReceiveLess;
+import com.jeido.vtuberrpgapi.dto.stat.StatDTOSendFull;
+import com.jeido.vtuberrpgapi.dto.stat.StatDTOSendLess;
 import com.jeido.vtuberrpgapi.services.StatService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

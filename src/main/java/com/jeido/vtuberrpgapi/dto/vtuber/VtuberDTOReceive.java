@@ -1,5 +1,7 @@
-package com.jeido.vtuberrpgapi.dto;
+package com.jeido.vtuberrpgapi.dto.vtuber;
 
+import com.jeido.vtuberrpgapi.dto.stat.StatDTOReceiveFull;
+import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOReceiveFull;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -23,4 +25,5 @@ public class VtuberDTOReceive {
 
     private List<UUID> userIds;
     private List<StatDTOReceiveFull> stats;
+    private List<TriggerDTOReceiveFull> triggers;
 }

@@ -1,7 +1,7 @@
 package com.jeido.vtuberrpgapi.services;
 
-import com.jeido.vtuberrpgapi.dto.VtuberDTOReceive;
-import com.jeido.vtuberrpgapi.dto.VtuberDTOSend;
+import com.jeido.vtuberrpgapi.dto.vtuber.VtuberDTOReceive;
+import com.jeido.vtuberrpgapi.dto.vtuber.VtuberDTOSend;
 import com.jeido.vtuberrpgapi.entites.User;
 import com.jeido.vtuberrpgapi.entites.Vtuber;
 import com.jeido.vtuberrpgapi.repositories.UserRepository;
@@ -18,6 +18,7 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
     private final VtuberRepository vtuberRepository;
     private final UserRepository userRepository;
     private final StatService statService;
+    private final TriggerService triggerService;
 
     public VtuberDTOSend toDTOSend(Vtuber vtuber) {
         return VtuberDTOSend.builder()
@@ -25,6 +26,7 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
                 .name(vtuber.getName())
                 .userIds(vtuber.getUsers().stream().map(User::getId).toList())
                 .stats(statService.toDTOSendLess(vtuber.getStats()))
+                .triggers(triggerService.toDTOLess(vtuber.getTriggers()))
                 .build();
     }
 
@@ -37,10 +39,11 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
     }
 
     @Autowired
-    public VtuberService(VtuberRepository vtuberRepository, UserRepository userRepository, StatService statService) {
+    public VtuberService(VtuberRepository vtuberRepository, UserRepository userRepository, StatService statService, TriggerService triggerService) {
         this.vtuberRepository = vtuberRepository;
         this.userRepository = userRepository;
         this.statService = statService;
+        this.triggerService = triggerService;
     }
 
     @Override
@@ -49,6 +52,8 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
         return toDTOSend(vtuberRepository.save(Vtuber.builder()
                         .name(vtuberDTOReceive.getName())
                         .users(new ArrayList<>())
+                        .stats(new ArrayList<>())
+                        .triggers(new ArrayList<>())
                 .build()));
     }
 

@@ -1,17 +1,15 @@
-package com.jeido.vtuberrpgapi.dto;
+package com.jeido.vtuberrpgapi.dto.stat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TriggerDTOReceive {
+public class StatDTOSendLess {
     private String label;
-    private UUID vtuberId;
+    private String value;
 }
