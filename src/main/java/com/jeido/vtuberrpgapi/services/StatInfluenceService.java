@@ -69,13 +69,17 @@ public class StatInfluenceService {
                     stat.getId().getVtuber().getId()
             );
 
-        return toDTO(statInfluenceRepository.save(StatInfluence.builder()
-                .stat(stat)
-                .trigger(trigger)
-                .value(influenceDTOReceive.getValue())
-                .operator(influenceDTOReceive.getOperator())
-                .build()
-        ));
+        StatInfluence influenceToSave = statInfluenceRepository.save(StatInfluence.builder()
+                        .stat(stat)
+                        .trigger(trigger)
+                        .value(influenceDTOReceive.getValue())
+                        .operator(influenceDTOReceive.getOperator())
+                        .build());
+
+        trigger.getInfluences().add(influenceToSave);
+        stat.getInfluences().add(influenceToSave);
+
+        return toDTO(influenceToSave);
     }
 
     public List<StatInfluenceDTOSend> findAll() {
@@ -107,7 +111,9 @@ public class StatInfluenceService {
 
         if (!influenceDTOReceive.getStatLabel().equals(statInfluenceToUpdate.getStat().getId().getLabel())) {
             Stat newStat = statRepository.findById(new VtuberStringCompositeKey(vtuberRepository.findById(statInfluenceToUpdate.getStat().getId().getVtuber().getId()).orElseThrow(() -> new VtuberIdNotFoundException(statInfluenceToUpdate.getStat().getId().getVtuber().getId())), influenceDTOReceive.getStatLabel())).orElseThrow(() -> new StatNotFoundException(influenceDTOReceive.getStatLabel(), statInfluenceToUpdate.getStat().getId().getVtuber().getId()));
+            statInfluenceToUpdate.getStat().getInfluences().remove(statInfluenceToUpdate);
             statInfluenceToUpdate.setStat(newStat);
+            statInfluenceToUpdate.getStat().getInfluences().add(statInfluenceToUpdate);
         }
 
         if (influenceDTOReceive.getValue() != null && !influenceDTOReceive.getValue().equals(statInfluenceToUpdate.getValue())) {

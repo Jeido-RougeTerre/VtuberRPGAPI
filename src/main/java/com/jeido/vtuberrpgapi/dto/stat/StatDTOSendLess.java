@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.UUID;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -12,4 +15,5 @@ import lombok.NoArgsConstructor;
 public class StatDTOSendLess {
     private String label;
     private String value;
+    private List<UUID> influences;
 }

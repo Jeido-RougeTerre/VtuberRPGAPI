@@ -110,8 +110,9 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
                 userRepository.save(user);
             }
         }
-        vtuberRepository.deleteById(id);
         statService.delete(id);
+        triggerService.delete(id);
+        vtuberRepository.deleteById(id);
         return !vtuberRepository.existsById(id);
     }
 
