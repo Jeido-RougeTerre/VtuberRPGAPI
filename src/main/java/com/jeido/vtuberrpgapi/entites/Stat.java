@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 
 @Entity
 @Table(name = "stats")
@@ -23,5 +25,8 @@ public class Stat {
     private VtuberStringCompositeKey id;
 
     private String value;
+
+    @OneToMany(mappedBy = "stat")
+    private List<StatInfluence> influences;
 
 }

@@ -22,10 +22,12 @@ public class StatService {
 
     private final VtuberRepository vtuberRepository;
     private final StatRepository statRepository;
+    private final StatInfluenceService statInfluenceService;
 
-    public StatService(VtuberRepository vtuberRepository, StatRepository statRepository) {
+    public StatService(VtuberRepository vtuberRepository, StatRepository statRepository, StatInfluenceService statInfluenceService) {
         this.vtuberRepository = vtuberRepository;
         this.statRepository = statRepository;
+        this.statInfluenceService = statInfluenceService;
     }
 
     public StatDTOSendLess toDTOSendLess(Stat stat) {
@@ -37,8 +39,10 @@ public class StatService {
 
     public List<StatDTOSendLess> toDTOSendLess(List<Stat> stats) {
         List<StatDTOSendLess> statDTOSendLessList = new ArrayList<>();
-        for (Stat stat : stats) {
-            statDTOSendLessList.add(toDTOSendLess(stat));
+        if (stats != null) {
+            for (Stat stat : stats) {
+                statDTOSendLessList.add(toDTOSendLess(stat));
+            }
         }
         return statDTOSendLessList;
     }
@@ -125,13 +129,17 @@ public class StatService {
         VtuberStringCompositeKey key = new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId)
                 .orElseThrow(() -> new VtuberIdNotFoundException(vtuberId)), label);
         if (!statRepository.existsById(key)) return false;
+        statInfluenceService.deleteForStat(vtuberId, label);
         statRepository.deleteById(key);
         return !statRepository.existsById(key);
     }
 
     public boolean delete(UUID vtuberId) {
         if (!vtuberRepository.existsById(vtuberId)) return false;
-        statRepository.deleteAll(statRepository.findByVtuberId(vtuberId));
+
+        statRepository.findByVtuberId(vtuberId).forEach(stat -> {
+            delete(stat.getId().getLabel(), vtuberId);
+        });
         return statRepository.findByVtuberId(vtuberId).isEmpty();
     }
 }

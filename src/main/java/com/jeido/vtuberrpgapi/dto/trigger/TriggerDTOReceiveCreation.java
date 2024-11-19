@@ -12,7 +12,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TriggerDTOReceiveFull {
+public class TriggerDTOReceiveCreation {
 
     @NotNull(message = "Label should not be Empty")
     @NotEmpty(message = "Label should not be Empty")

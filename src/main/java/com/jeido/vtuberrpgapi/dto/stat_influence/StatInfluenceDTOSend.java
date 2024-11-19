@@ -1,21 +1,21 @@
-package com.jeido.vtuberrpgapi.dto.stat;
+package com.jeido.vtuberrpgapi.dto.stat_influence;
 
-import com.jeido.vtuberrpgapi.dto.stat_influence.StatInfluenceDTOSend;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class StatDTOSendFull {
+public class StatInfluenceDTOSend {
+    private UUID id;
     private UUID vtuberId;
-    private String label;
+    private String triggerLabel;
+    private String statLabel;
     private String value;
-    private List<StatInfluenceDTOSend> influences;
+    private String operator;
 }

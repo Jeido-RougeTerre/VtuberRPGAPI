@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 
 @Entity
 @Data
@@ -21,4 +23,7 @@ public class Trigger {
             @AttributeOverride(name= "label", column = @Column(name= "label", insertable = false, updatable = false))
     })
     private VtuberStringCompositeKey id;
+
+    @OneToMany(mappedBy = "trigger")
+    private List<StatInfluence> influences;
 }

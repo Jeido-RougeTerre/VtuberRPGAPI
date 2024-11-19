@@ -1,7 +1,7 @@
 package com.jeido.vtuberrpgapi.controllers;
 
-import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOReceiveFull;
-import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOReceiveLess;
+import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOReceiveCreation;
+import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOReceiveUpdate;
 import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOSendFull;
 import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOSendLess;
 import com.jeido.vtuberrpgapi.services.TriggerService;
@@ -29,8 +29,8 @@ public class TriggerController {
     }
 
     @PostMapping
-    public ResponseEntity<TriggerDTOSendFull> createTrigger(@Valid @RequestBody TriggerDTOReceiveFull triggerDTOReceiveFull) {
-        return new ResponseEntity<>(triggerService.create(triggerDTOReceiveFull), HttpStatus.CREATED);
+    public ResponseEntity<TriggerDTOSendFull> createTrigger(@Valid @RequestBody TriggerDTOReceiveCreation triggerDTOReceiveCreation) {
+        return new ResponseEntity<>(triggerService.create(triggerDTOReceiveCreation), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -54,8 +54,8 @@ public class TriggerController {
     }
 
     @PutMapping("/{id}/{label}")
-    public ResponseEntity<TriggerDTOSendFull> updateTrigger(@PathVariable("id") UUID id, @PathVariable("label") String label, @Valid @RequestBody TriggerDTOReceiveLess triggerDTOReceiveLess) {
-        return ResponseEntity.ok(triggerService.update(label, id, triggerDTOReceiveLess));
+    public ResponseEntity<TriggerDTOSendFull> updateTrigger(@PathVariable("id") UUID id, @PathVariable("label") String label, @Valid @RequestBody TriggerDTOReceiveUpdate triggerDTOReceiveUpdate) {
+        return ResponseEntity.ok(triggerService.update(label, id, triggerDTOReceiveUpdate));
     }
 
     @DeleteMapping("/{id}/{label}")
