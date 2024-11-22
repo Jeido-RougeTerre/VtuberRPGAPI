@@ -3,14 +3,10 @@ package com.jeido.vtuberrpgapi.services;
 import com.jeido.vtuberrpgapi.dto.user.UserDTOLogin;
 import com.jeido.vtuberrpgapi.dto.user.UserDTOReceive;
 import com.jeido.vtuberrpgapi.dto.user.UserDTOSend;
-import com.jeido.vtuberrpgapi.dto.vtuber.VtuberDTOReceive;
-import com.jeido.vtuberrpgapi.dto.vtuber.VtuberDTOSend;
 import com.jeido.vtuberrpgapi.entites.User;
 import com.jeido.vtuberrpgapi.entites.Vtuber;
 import com.jeido.vtuberrpgapi.repositories.UserRepository;
-import com.jeido.vtuberrpgapi.repositories.VtuberRepository;
 import com.jeido.vtuberrpgapi.utils.exceptions.user.*;
-import com.jeido.vtuberrpgapi.utils.exceptions.vtuber.VtuberIdNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +16,10 @@ import java.util.*;
 public class UserService implements BaseService<UserDTOReceive, UserDTOSend> {
 
     private final UserRepository userRepository;
-    private final VtuberRepository vtuberRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository, VtuberRepository vtuberRepository) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.vtuberRepository = vtuberRepository;
     }
 
     public UserDTOSend toDTOSend(User user) {
@@ -141,16 +135,18 @@ public class UserService implements BaseService<UserDTOReceive, UserDTOSend> {
         String usernameOrEmail = userDTOLogin.getUsernameOrEmail();
         String password = userDTOLogin.getPassword();
 
-        if (existUsername(usernameOrEmail) && userRepository.findByUsername(usernameOrEmail).stream().anyMatch(
-                user -> user.getPassword().equals(password)
-        )) {
-            return toDTOSend(userRepository.findByUsername(usernameOrEmail).get());
+
+        User user = null;
+        if (existUsername(usernameOrEmail)) {
+            user = userRepository.findByUsername(usernameOrEmail).orElse(null);
         }
 
-        if (existEmail(usernameOrEmail) && userRepository.findByEmail(usernameOrEmail).stream().anyMatch(
-                user -> user.getPassword().equals(password)
-        )) {
-            return toDTOSend(userRepository.findByEmail(usernameOrEmail).get());
+        if (existEmail(usernameOrEmail)) {
+            user = userRepository.findByEmail(usernameOrEmail).orElse(null);
+        }
+
+        if (user != null && user.getPassword().equals(password)) {
+            return toDTOSend(user);
         }
 
         throw new InvalidLoginException();

@@ -1,5 +1,6 @@
 package com.jeido.vtuberrpgapi.advices;
 
+import com.jeido.vtuberrpgapi.utils.exceptions.APIException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,7 +25,7 @@ public class ApplicationExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler(APIException.class)
     public Map<String, String> handleInvalidArgumentException(IllegalArgumentException ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("error", ex.getMessage());

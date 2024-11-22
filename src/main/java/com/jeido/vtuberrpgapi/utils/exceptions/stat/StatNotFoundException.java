@@ -1,8 +1,10 @@
 package com.jeido.vtuberrpgapi.utils.exceptions.stat;
 
+import com.jeido.vtuberrpgapi.utils.exceptions.APIException;
+
 import java.util.UUID;
 
-public class StatNotFoundException extends RuntimeException {
+public class StatNotFoundException extends APIException {
     public StatNotFoundException(UUID id) {
         super("Stat with Id " + id + " not found");
     }
