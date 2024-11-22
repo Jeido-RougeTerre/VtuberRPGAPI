@@ -1,21 +1,19 @@
 package com.jeido.vtuberrpgapi.services;
 
+import com.jeido.vtuberrpgapi.dto.stat.StatDTOSendLess;
 import com.jeido.vtuberrpgapi.dto.stat_influence.StatInfluenceDTOReceive;
 import com.jeido.vtuberrpgapi.dto.stat_influence.StatInfluenceDTOSend;
 import com.jeido.vtuberrpgapi.entites.Stat;
 import com.jeido.vtuberrpgapi.entites.StatInfluence;
 import com.jeido.vtuberrpgapi.entites.Trigger;
-import com.jeido.vtuberrpgapi.entites.Vtuber;
-import com.jeido.vtuberrpgapi.entites.keys.VtuberStringCompositeKey;
 import com.jeido.vtuberrpgapi.repositories.StatInfluenceRepository;
 import com.jeido.vtuberrpgapi.repositories.StatRepository;
 import com.jeido.vtuberrpgapi.repositories.TriggerRepository;
-import com.jeido.vtuberrpgapi.repositories.VtuberRepository;
 import com.jeido.vtuberrpgapi.utils.exceptions.stat.StatNotFoundException;
 import com.jeido.vtuberrpgapi.utils.exceptions.stat_influence.NotMatchingVtuberIdException;
 import com.jeido.vtuberrpgapi.utils.exceptions.stat_influence.StatInfluenceNotFoundException;
+import com.jeido.vtuberrpgapi.utils.exceptions.stat_influence.TriggerCannotActException;
 import com.jeido.vtuberrpgapi.utils.exceptions.trigger.TriggerNotFoundException;
-import com.jeido.vtuberrpgapi.utils.exceptions.vtuber.VtuberIdNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,13 +23,11 @@ import java.util.UUID;
 @Service
 public class StatInfluenceService {
     private final TriggerRepository triggerRepository;
-    private final VtuberRepository vtuberRepository;
     private final StatRepository statRepository;
     private final StatInfluenceRepository statInfluenceRepository;
 
-    public StatInfluenceService(TriggerRepository triggerRepository, VtuberRepository vtuberRepository, StatRepository statRepository, StatInfluenceRepository statInfluenceRepository) {
+    public StatInfluenceService(TriggerRepository triggerRepository, StatRepository statRepository, StatInfluenceRepository statInfluenceRepository) {
         this.triggerRepository = triggerRepository;
-        this.vtuberRepository = vtuberRepository;
         this.statRepository = statRepository;
         this.statInfluenceRepository = statInfluenceRepository;
     }
@@ -39,9 +35,8 @@ public class StatInfluenceService {
     public StatInfluenceDTOSend toDTO(StatInfluence statInfluence) {
         return StatInfluenceDTOSend.builder()
                 .id(statInfluence.getId())
-                .vtuberId(statInfluence.getStat().getId().getVtuber().getId())
-                .statLabel(statInfluence.getStat().getId().getLabel())
-                .triggerLabel(statInfluence.getTrigger().getId().getLabel())
+                .statId(statInfluence.getStat().getId())
+                .triggerId(statInfluence.getTrigger().getId())
                 .value(statInfluence.getValue())
                 .operator(statInfluence.getOperator())
                 .build();
@@ -56,17 +51,14 @@ public class StatInfluenceService {
     }
 
     public StatInfluenceDTOSend create(StatInfluenceDTOReceive influenceDTOReceive) {
-        Vtuber vtuber = vtuberRepository.findById(influenceDTOReceive.getVtuberId()).orElseThrow(() -> new VtuberIdNotFoundException(influenceDTOReceive.getVtuberId()));
-        VtuberStringCompositeKey tKey = new VtuberStringCompositeKey(vtuber, influenceDTOReceive.getTriggerLabel());
-        Trigger trigger = triggerRepository.findById(tKey).orElseThrow(() -> new TriggerNotFoundException(influenceDTOReceive.getTriggerLabel(), influenceDTOReceive.getVtuberId()));
+        Trigger trigger = triggerRepository.findById(influenceDTOReceive.getTriggerId()).orElseThrow(() -> new TriggerNotFoundException(influenceDTOReceive.getTriggerId()));
 
-        VtuberStringCompositeKey sKey = new VtuberStringCompositeKey(vtuber, influenceDTOReceive.getStatLabel());
-        Stat stat = statRepository.findById(sKey).orElseThrow(() -> new StatNotFoundException(influenceDTOReceive.getStatLabel(), influenceDTOReceive.getVtuberId()));
+        Stat stat = statRepository.findById(influenceDTOReceive.getStatId()).orElseThrow(() -> new StatNotFoundException(influenceDTOReceive.getStatId()));
 
-        if (!trigger.getId().getVtuber().getId().equals(stat.getId().getVtuber().getId()))
+        if (!trigger.getVtuber().getId().equals(stat.getVtuber().getId()))
             throw new NotMatchingVtuberIdException(
-                    trigger.getId().getVtuber().getId(),
-                    stat.getId().getVtuber().getId()
+                    trigger.getVtuber().getId(),
+                    stat.getVtuber().getId()
             );
 
         StatInfluence influenceToSave = statInfluenceRepository.save(StatInfluence.builder()
@@ -95,22 +87,20 @@ public class StatInfluenceService {
     }
 
     public List<StatInfluenceDTOSend> findForTrigger(UUID vtuberId, String triggerLabel) {
-        VtuberStringCompositeKey key = new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId).orElseThrow(() -> new VtuberIdNotFoundException(vtuberId)), triggerLabel);
-        Trigger trigger = triggerRepository.findById(key).orElseThrow(() -> new TriggerNotFoundException(triggerLabel, vtuberId));
+        Trigger trigger = triggerRepository.findByVtuberIdAndLabel(vtuberId, triggerLabel).orElseThrow(() -> new TriggerNotFoundException(vtuberId, triggerLabel));
         return toDTO(statInfluenceRepository.findByTrigger(trigger));
     }
 
     public List<StatInfluenceDTOSend> findForStat(UUID vtuberId, String statLabel) {
-        VtuberStringCompositeKey key = new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId).orElseThrow(() -> new VtuberIdNotFoundException(vtuberId)), statLabel);
-        Stat stat = statRepository.findById(key).orElseThrow(() -> new StatNotFoundException(statLabel, vtuberId));
+        Stat stat = statRepository.findByVtuberIdAndLabel(vtuberId, statLabel).orElseThrow(() -> new StatNotFoundException(vtuberId, statLabel));
         return toDTO(statInfluenceRepository.findByStat(stat));
     }
 
     public StatInfluenceDTOSend update(UUID id, StatInfluenceDTOReceive influenceDTOReceive) {
         StatInfluence statInfluenceToUpdate = statInfluenceRepository.findById(id).orElseThrow(() -> new StatInfluenceNotFoundException(id));
 
-        if (!influenceDTOReceive.getStatLabel().equals(statInfluenceToUpdate.getStat().getId().getLabel())) {
-            Stat newStat = statRepository.findById(new VtuberStringCompositeKey(vtuberRepository.findById(statInfluenceToUpdate.getStat().getId().getVtuber().getId()).orElseThrow(() -> new VtuberIdNotFoundException(statInfluenceToUpdate.getStat().getId().getVtuber().getId())), influenceDTOReceive.getStatLabel())).orElseThrow(() -> new StatNotFoundException(influenceDTOReceive.getStatLabel(), statInfluenceToUpdate.getStat().getId().getVtuber().getId()));
+        if (!influenceDTOReceive.getStatId().equals(statInfluenceToUpdate.getStat().getId())) {
+            Stat newStat = statRepository.findById(influenceDTOReceive.getStatId()).orElseThrow(() -> new StatNotFoundException(influenceDTOReceive.getStatId()));
             statInfluenceToUpdate.getStat().getInfluences().remove(statInfluenceToUpdate);
             statInfluenceToUpdate.setStat(newStat);
             statInfluenceToUpdate.getStat().getInfluences().add(statInfluenceToUpdate);
@@ -144,11 +134,8 @@ public class StatInfluenceService {
         return !statInfluenceRepository.existsByVtuberId(vtuberId);
     }
 
-    public boolean deleteForTrigger(UUID vtuberId, String triggerLabel) {
-        if (!statInfluenceRepository.existsByVtuberId(vtuberId)) return false;
-
-        VtuberStringCompositeKey key = new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId).orElseThrow(() -> new VtuberIdNotFoundException(vtuberId)), triggerLabel);
-        Trigger trigger = triggerRepository.findById(key).orElse(null);
+    public boolean deleteForTrigger(UUID triggerId) {
+        Trigger trigger = triggerRepository.findById(triggerId).orElse(null);
         if (trigger == null) return false;
 
         if (!statInfluenceRepository.existsByTrigger(trigger)) return false;
@@ -158,15 +145,98 @@ public class StatInfluenceService {
         return !statInfluenceRepository.existsByTrigger(trigger);
     }
 
-    public boolean deleteForStat(UUID vtuberId, String statLabel) {
-        if (!statInfluenceRepository.existsByVtuberId(vtuberId)) return false;
 
-        VtuberStringCompositeKey key = new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId).orElseThrow(() -> new VtuberIdNotFoundException(vtuberId)), statLabel);
-        Stat stat = statRepository.findById(key).orElse(null);
+
+    public boolean deleteForStat(UUID statId) {
+        Stat stat = statRepository.findById(statId).orElse(null);
         if (stat == null) return false;
 
         if (!statInfluenceRepository.existsByStat(stat)) return false;
         statInfluenceRepository.deleteAll(statInfluenceRepository.findByStat(stat));
         return !statInfluenceRepository.existsByStat(stat);
     }
+
+    public List<StatDTOSendLess> act(UUID triggerId) {
+        Trigger trigger = triggerRepository.findById(triggerId).orElseThrow(() -> new TriggerNotFoundException(triggerId));
+
+        if (trigger.getInfluences().isEmpty()) throw new TriggerCannotActException(triggerId);
+
+        List<StatDTOSendLess> statDTOs = new ArrayList<>();
+        for(StatInfluence influence : trigger.getInfluences()) {
+            Stat stat = statRepository.findById(influence.getStat().getId()).orElseThrow(() -> new StatNotFoundException(influence.getStat().getId()));
+
+
+            try {
+                double val = Double.parseDouble(stat.getValue());
+                double influenceVal = Double.parseDouble(influence.getValue());
+
+                switch (influence.getOperator()) {
+                    case "+":
+                        val += influenceVal;
+                        break;
+                    case "-":
+                        val -= influenceVal;
+                        break;
+                    case "*":
+                        val *= influenceVal;
+                        break;
+                    case "/":
+                        if (influenceVal != 0) {
+                            val /= influenceVal;
+                        }
+                        break;
+                    case "=":
+                        val = influenceVal;
+                        break;
+                    default:
+                        break;
+                }
+                stat.setValue("" + val);
+
+            } catch (NumberFormatException e) {
+                String val = stat.getValue();
+                String influenceVal = influence.getValue();
+
+                switch (influence.getOperator()) {
+                    case "+":
+                        val += influenceVal;
+                        break;
+                    case "-":
+                        try {
+                            int nb = Integer.parseInt(influenceVal);
+
+                            if (nb < 0) nb = 0;
+
+                            if (nb > val.length() - 1) nb = val.length() - 1;
+
+                            val = val.substring(0, val.length() - 1 - nb);
+                        } catch (NumberFormatException e1) {
+                            val = val.replaceAll(influenceVal, "");
+                        }
+                        break;
+                    case "*":
+                        val = val.toUpperCase();
+                        break;
+                    case "/":
+                        val = val.toLowerCase();
+                        break;
+                    case "=":
+                        val = influenceVal;
+                        break;
+                    default:
+                        break;
+                }
+                stat.setValue(val);
+            }
+            Stat statUpdated = statRepository.save(stat);
+            statDTOs.add(StatDTOSendLess.builder()
+                    .value(statUpdated.getValue())
+                    .label(statUpdated.getLabel())
+                    .influences(toDTO(statUpdated.getInfluences()))
+                    .build()
+            );
+        }
+        return statDTOs;
+    }
+
 }

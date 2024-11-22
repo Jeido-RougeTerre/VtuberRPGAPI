@@ -22,7 +22,7 @@ public class StatInfluenceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<StatInfluenceDTOSend>> getStatInfluences(@RequestParam(value = "vtuber", required = false)UUID vtuberId, @RequestParam(value = "stat", required = false)String statLabel, @RequestParam(value = "trigger", required = false)String triggerLabel) {
+    public ResponseEntity<List<StatInfluenceDTOSend>> getStatInfluences(@RequestParam(value = "vtuber", required = false)UUID vtuberId, @RequestParam(value = "statId", required = false)String statLabel, @RequestParam(value = "trigger", required = false)String triggerLabel) {
         if (vtuberId != null) {
             if (triggerLabel != null) {
                 return ResponseEntity.ok(statInfluenceService.findForTrigger(vtuberId, triggerLabel));
@@ -41,15 +41,15 @@ public class StatInfluenceController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Boolean> deleteStatInfluences(@RequestParam(value = "vtuber", required = false)UUID vtuberId, @RequestParam(value = "trigger", required = false)String triggerLabel, @RequestParam(value = "stat", required = false)String statLabel) {
+    public ResponseEntity<Boolean> deleteStatInfluences(@RequestParam(value = "vtuber", required = false)UUID vtuberId, @RequestParam(value = "trigger", required = false)UUID triggerId, @RequestParam(value = "statId", required = false)UUID statId) {
         if (vtuberId != null) {
-            if (triggerLabel != null) {
-                return ResponseEntity.ok(statInfluenceService.deleteForTrigger(vtuberId, triggerLabel));
-            }
-            if (statLabel != null) {
-                return ResponseEntity.ok(statInfluenceService.deleteForStat(vtuberId, statLabel));
-            }
             return ResponseEntity.ok(statInfluenceService.deleteForVtuber(vtuberId));
+        }
+        if (triggerId != null) {
+            return ResponseEntity.ok(statInfluenceService.deleteForTrigger(triggerId));
+        }
+        if (statId != null) {
+            return ResponseEntity.ok(statInfluenceService.deleteForStat(statId));
         }
         return ResponseEntity.ok(statInfluenceService.deleteAll());
     }

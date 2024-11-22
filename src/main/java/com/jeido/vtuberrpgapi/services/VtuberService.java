@@ -80,11 +80,6 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
     }
 
     @Override
-    public boolean exist(UUID id) {
-        return vtuberRepository.existsById(id);
-    }
-
-    @Override
     public VtuberDTOSend update(UUID id, VtuberDTOReceive vtuberDTOReceive) {
 
         Vtuber vtuber = vtuberRepository.findById(id).orElseThrow(() -> new VtuberIdNotFoundException(id));
@@ -111,7 +106,7 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
             }
         }
         statService.delete(id);
-        triggerService.delete(id);
+        triggerService.deleteByVtuber(id);
         vtuberRepository.deleteById(id);
         return !vtuberRepository.existsById(id);
     }

@@ -8,8 +8,6 @@ import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOSendFull;
 import com.jeido.vtuberrpgapi.dto.trigger.TriggerDTOSendLess;
 import com.jeido.vtuberrpgapi.entites.StatInfluence;
 import com.jeido.vtuberrpgapi.entites.Trigger;
-import com.jeido.vtuberrpgapi.entites.Vtuber;
-import com.jeido.vtuberrpgapi.entites.keys.VtuberStringCompositeKey;
 import com.jeido.vtuberrpgapi.repositories.StatRepository;
 import com.jeido.vtuberrpgapi.repositories.TriggerRepository;
 import com.jeido.vtuberrpgapi.repositories.VtuberRepository;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -41,8 +38,10 @@ public class TriggerService {
 
     public TriggerDTOSendFull toDTOFull(Trigger trigger) {
         return TriggerDTOSendFull.builder()
-                .label(trigger.getId().getLabel())
-                .vtuberId(trigger.getId().getVtuber().getId())
+                .id(trigger.getId())
+                .label(trigger.getLabel())
+                .vtuberId(trigger.getVtuber().getId())
+                .influences(statInfluenceService.toDTO(trigger.getInfluences()))
                 .build();
     }
 
@@ -56,7 +55,8 @@ public class TriggerService {
 
     public TriggerDTOSendLess toDTOLess(Trigger trigger) {
         return TriggerDTOSendLess.builder()
-                .label(trigger.getId().getLabel())
+                .label(trigger.getLabel())
+                .influences(statInfluenceService.toDTO(trigger.getInfluences()))
                 .build();
     }
 
@@ -72,23 +72,22 @@ public class TriggerService {
 
     public TriggerDTOSendFull create(TriggerDTOReceiveCreation triggerDTOReceiveCreation) {
         Trigger triggerToSave = Trigger.builder()
-                .id(new VtuberStringCompositeKey(vtuberRepository.findById(triggerDTOReceiveCreation.getVtuberId())
-                        .orElseThrow(() -> new VtuberIdNotFoundException(triggerDTOReceiveCreation.getVtuberId())),
-                        triggerDTOReceiveCreation.getLabel()))
+                .label(triggerDTOReceiveCreation.getLabel())
+                .vtuber(vtuberRepository.findById(triggerDTOReceiveCreation.getVtuberId()).orElseThrow(() -> new VtuberIdNotFoundException(triggerDTOReceiveCreation.getVtuberId())))
                 .build();
-        if (triggerRepository.existsById(triggerToSave.getId())) {
-            throw new TriggerLabelForVtuberIdAlreadyInDBException(triggerToSave.getId().getLabel(), triggerToSave.getId().getVtuber().getId());
+        if (triggerRepository.existsByVtuberIdAndLabel(triggerToSave.getVtuber().getId(), triggerToSave.getLabel())) {
+            throw new TriggerLabelForVtuberIdAlreadyInDBException(triggerToSave.getLabel(), triggerToSave.getVtuber().getId());
         }
 
         return toDTOFull(triggerRepository.save(triggerToSave));
     }
 
     public TriggerDTOSendFull create(UUID vtuberId, String label) {
-        VtuberStringCompositeKey key = new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId).orElseThrow(() -> new VtuberIdNotFoundException(vtuberId)), label);
-        if (statRepository.existsById(key)) throw new TriggerLabelForVtuberIdAlreadyInDBException(label, vtuberId);
+        if (statRepository.existsByVtuberIdAndLabel(vtuberId, label)) throw new TriggerLabelForVtuberIdAlreadyInDBException(label, vtuberId);
 
         return toDTOFull(triggerRepository.save(Trigger.builder()
-                .id(key)
+                        .vtuber(vtuberRepository.findById(vtuberId).orElseThrow(() -> new VtuberIdNotFoundException(vtuberId)))
+                .label(label)
                 .build()
         ));
     }
@@ -97,29 +96,24 @@ public class TriggerService {
         return toDTOFull((List<Trigger>) triggerRepository.findAll());
     }
 
-    public List<TriggerDTOSendLess> findByVtuberId(UUID vtuberId) {
+    public List<TriggerDTOSendFull> findByVtuberId(UUID vtuberId) {
         if (!vtuberRepository.existsById(vtuberId)) throw new VtuberIdNotFoundException(vtuberId);
-        return toDTOLess(triggerRepository.findByVtuberId(vtuberId));
+        return toDTOFull(triggerRepository.findByVtuberId(vtuberId));
     }
 
-    public TriggerDTOSendLess findByLabelAndVtuberId(String label, UUID vtuberId) {
-        VtuberStringCompositeKey key = new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId).orElseThrow(() -> new VtuberIdNotFoundException(vtuberId)), label);
-        return toDTOLess(triggerRepository.findById(key).orElseThrow(() -> new TriggerNotFoundException(label, vtuberId)));
+    public TriggerDTOSendFull findByLabelAndVtuberId(String label, UUID vtuberId) {
+        return toDTOFull(triggerRepository.findByVtuberIdAndLabel(vtuberId, label).orElseThrow(() -> new TriggerNotFoundException(vtuberId, label)));
     }
 
-    public TriggerDTOSendFull update(String label, UUID vtuberId, TriggerDTOReceiveUpdate triggerDTOReceiveUpdate) {
-        Vtuber parsedVtuber = vtuberRepository.findById(vtuberId).orElseThrow(() -> new VtuberIdNotFoundException(vtuberId));
-        VtuberStringCompositeKey key = new VtuberStringCompositeKey(parsedVtuber, label);
-        Trigger triggerToUpdate = triggerRepository.findById(key).orElseThrow(() -> new TriggerNotFoundException(label, vtuberId));
+    public TriggerDTOSendFull update(UUID id, TriggerDTOReceiveUpdate triggerDTOReceiveUpdate) {
+        Trigger triggerToUpdate = triggerRepository.findById(id).orElseThrow(() -> new TriggerNotFoundException(id));
 
-        if (triggerDTOReceiveUpdate.getLabel() != null && !triggerDTOReceiveUpdate.getLabel().equals(triggerToUpdate.getId().getLabel())) {
-            VtuberStringCompositeKey newKey = new VtuberStringCompositeKey(parsedVtuber, triggerDTOReceiveUpdate.getLabel());
-            if (triggerRepository.existsById(newKey)) {
-                throw new TriggerLabelForVtuberIdAlreadyInDBException(label, vtuberId);
+        if (triggerDTOReceiveUpdate.getLabel() != null && !triggerDTOReceiveUpdate.getLabel().equals(triggerToUpdate.getLabel())) {
+            if (triggerRepository.existsByVtuberIdAndLabel(triggerToUpdate.getVtuber().getId(), triggerDTOReceiveUpdate.getLabel())) {
+                throw new TriggerLabelForVtuberIdAlreadyInDBException(triggerDTOReceiveUpdate.getLabel(), triggerToUpdate.getVtuber().getId());
             }
 
-            triggerToUpdate.setId(newKey);
-            triggerRepository.deleteById(key);
+            triggerToUpdate.setLabel(triggerDTOReceiveUpdate.getLabel());
         }
 
         if (triggerDTOReceiveUpdate.getInfluences() != null && !triggerDTOReceiveUpdate.getInfluences().isEmpty()) {
@@ -127,16 +121,16 @@ public class TriggerService {
             for (StatInfluenceDTOSend influenceDTOSend : triggerDTOReceiveUpdate.getInfluences()) {
                 if (statInfluencesId.contains(influenceDTOSend.getId())) {
                     statInfluenceService.update(influenceDTOSend.getId(), StatInfluenceDTOReceive.builder()
-                                    .vtuberId(influenceDTOSend.getVtuberId())
-                                    .triggerLabel(triggerDTOReceiveUpdate.getLabel())
-                                    .statLabel(influenceDTOSend.getStatLabel())
+
+                                    .triggerId(influenceDTOSend.getTriggerId())
+                                    .statId(influenceDTOSend.getStatId())
                                     .value(influenceDTOSend.getValue())
                                     .operator(influenceDTOSend.getOperator())
                             .build());
                 } else {
                     statInfluenceService.create(StatInfluenceDTOReceive.builder()
-                            .triggerLabel(triggerDTOReceiveUpdate.getLabel())
-                            .statLabel(influenceDTOSend.getStatLabel())
+                            .triggerId(influenceDTOSend.getTriggerId())
+                            .statId(influenceDTOSend.getStatId())
                             .value(influenceDTOSend.getValue())
                             .operator(influenceDTOSend.getOperator())
                             .build());
@@ -147,18 +141,21 @@ public class TriggerService {
         return toDTOFull(triggerRepository.save(triggerToUpdate));
     }
 
-    public boolean delete(String label, UUID vtuberId) {
-        VtuberStringCompositeKey key = new VtuberStringCompositeKey(vtuberRepository.findById(vtuberId).orElseThrow(() -> new VtuberIdNotFoundException(vtuberId)), label);
-        if(!triggerRepository.existsById(key)) return false;
-        statInfluenceService.deleteForTrigger(vtuberId, label);
-        triggerRepository.deleteById(key);
-        return !triggerRepository.existsById(key);
+    public boolean delete(UUID id) {
+        if(!triggerRepository.existsById(id)) return false;
+        statInfluenceService.deleteForTrigger(id);
+        triggerRepository.deleteById(id);
+        return !triggerRepository.existsById(id);
     }
 
-    public boolean delete(UUID vtuberId) {
+    public boolean deleteByVtuber(UUID vtuberId) {
         if (!vtuberRepository.existsById(vtuberId)) return false;
         statInfluenceService.deleteForVtuber(vtuberId);
         triggerRepository.deleteAll(triggerRepository.findByVtuberId(vtuberId));
         return statRepository.findByVtuberId(vtuberId).isEmpty();
+    }
+
+    public TriggerDTOSendFull findById(UUID id) {
+        return toDTOFull(triggerRepository.findById(id).orElseThrow(() -> new TriggerNotFoundException(id)));
     }
 }

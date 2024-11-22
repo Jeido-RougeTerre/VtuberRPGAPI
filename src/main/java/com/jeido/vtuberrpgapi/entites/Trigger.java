@@ -1,6 +1,5 @@
 package com.jeido.vtuberrpgapi.entites;
 
-import com.jeido.vtuberrpgapi.entites.keys.VtuberStringCompositeKey;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @Entity
@@ -17,12 +17,17 @@ import java.util.List;
 @NoArgsConstructor
 @Table(name = "triggers")
 public class Trigger {
-    @EmbeddedId
-    @AttributeOverrides({
-            @AttributeOverride(name = "vtuber", column = @Column(name = "vtuber_id", insertable = false, updatable = false)),
-            @AttributeOverride(name= "label", column = @Column(name= "label", insertable = false, updatable = false))
-    })
-    private VtuberStringCompositeKey id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "trigger_id")
+    private UUID id;
+
+    @ManyToOne
+    @JoinColumn(name = "vtuber_id")
+    private Vtuber vtuber;
+
+    private String label;
 
     @OneToMany(mappedBy = "trigger")
     private List<StatInfluence> influences;

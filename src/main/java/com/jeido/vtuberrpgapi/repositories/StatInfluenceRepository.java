@@ -17,15 +17,12 @@ public interface StatInfluenceRepository extends CrudRepository<StatInfluence, U
 
     List<StatInfluence> findByStat(Stat stat);
 
-    List<StatInfluence> findByTriggerAndStat(Trigger trigger, Stat stat);
-
-    @Query("SELECT si FROM StatInfluence si WHERE si.stat.id.vtuber.id= :id")
+    @Query("SELECT si FROM StatInfluence si WHERE si.trigger.vtuber.id= :id")
     List<StatInfluence> findByVtuberId(@Param("id") UUID id);
 
     boolean existsByTrigger(Trigger trigger);
     boolean existsByStat(Stat stat);
-    boolean existsByTriggerAndStat(Trigger trigger, Stat stat);
 
-    @Query("SELECT (count(si) > 0) FROM StatInfluence si WHERE si.stat.id.vtuber.id = :id")
+    @Query("SELECT (count(si) > 0) FROM StatInfluence si WHERE si.trigger.vtuber.id = :id")
     boolean existsByVtuberId(@Param("id") UUID id);
 }

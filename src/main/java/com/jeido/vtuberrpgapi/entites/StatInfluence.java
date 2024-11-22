@@ -21,9 +21,11 @@ public class StatInfluence {
     private UUID id;
 
     @ManyToOne
+    @JoinColumn(name = "trigger_id")
     private Trigger trigger;
 
     @ManyToOne
+    @JoinColumn(name = "stat_id")
     private Stat stat;
 
     private String value;

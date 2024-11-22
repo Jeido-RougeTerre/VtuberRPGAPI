@@ -14,6 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class StatDTOSendFull {
+    private UUID id;
     private UUID vtuberId;
     private String label;
     private String value;

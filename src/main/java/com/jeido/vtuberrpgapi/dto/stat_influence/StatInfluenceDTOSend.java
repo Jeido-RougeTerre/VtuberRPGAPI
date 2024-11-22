@@ -13,9 +13,8 @@ import java.util.UUID;
 @Builder
 public class StatInfluenceDTOSend {
     private UUID id;
-    private UUID vtuberId;
-    private String triggerLabel;
-    private String statLabel;
+    private UUID triggerId;
+    private UUID statId;
     private String value;
     private String operator;
 }

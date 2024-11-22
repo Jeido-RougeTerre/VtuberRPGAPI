@@ -94,10 +94,6 @@ public class UserService implements BaseService<UserDTOReceive, UserDTOSend> {
         return toDTOSend(userRepository.findAllByIsAdmin(true));
     }
 
-    @Override
-    public boolean exist(UUID id) {
-        return userRepository.existsById(id);
-    }
 
     public boolean existUsername(String username) {
         return userRepository.existsByUsername(username);
@@ -158,43 +154,5 @@ public class UserService implements BaseService<UserDTOReceive, UserDTOSend> {
         }
 
         throw new InvalidLoginException();
-    }
-
-    public VtuberDTOSend addAndCreateVtuber(UUID userId, VtuberDTOReceive vtuberDTOReceive) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserIdNotFoundException(userId));
-
-        Vtuber vtuber = Vtuber.builder()
-                .name(vtuberDTOReceive.getName())
-                .users(Collections.singletonList(user))
-                .build();
-
-        Vtuber vtuberUpdated = vtuberRepository.save(vtuber);
-
-        return VtuberDTOSend.builder()
-                .id(vtuberUpdated.getId())
-                .name(vtuberUpdated.getName())
-                .userIds(vtuberUpdated.getUsers().stream().map(User::getId).toList())
-                .build();
-    }
-
-    public VtuberDTOSend addVtuber(UUID userId, UUID vtuberId) {
-        if (!userRepository.existsById(userId)) throw new UserIdNotFoundException(userId);
-
-        Vtuber vtuber = vtuberRepository.findById(vtuberId).orElseThrow( () -> new VtuberIdNotFoundException(vtuberId));
-
-        for (User user : vtuber.getUsers()) {
-            if (user.getId().equals(userId)) throw new VtuberAlreadyAssociatedException(userId, vtuberId);
-        }
-
-        vtuber.getUsers().add(userRepository.findById(userId).orElseThrow(() -> new UserIdNotFoundException(userId)));
-
-        Vtuber vtuberUpdated = vtuberRepository.save(vtuber);
-
-        return VtuberDTOSend.builder()
-                .id(vtuberUpdated.getId())
-                .name(vtuberUpdated.getName())
-                .userIds(vtuberUpdated.getUsers().stream().map(User::getId).toList())
-                .build();
-
     }
 }

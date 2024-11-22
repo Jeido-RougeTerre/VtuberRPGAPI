@@ -30,10 +30,10 @@ public class Vtuber {
     )
     private List<User> users;
 
-    @OneToMany(mappedBy = "id.vtuber")
+    @OneToMany(mappedBy = "vtuber")
     private List<Stat> stats;
 
-    @OneToMany(mappedBy = "id.vtuber")
+    @OneToMany(mappedBy = "vtuber")
     private List<Trigger> triggers;
 
 }
