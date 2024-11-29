@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/vtubers/")
+@RequestMapping("/api/vtubers")
 public class VtuberController {
 
     private final VtuberService vtuberService;
@@ -36,17 +36,17 @@ public class VtuberController {
         return new ResponseEntity<>(vtuberService.create(vtuberDTOReceive), HttpStatus.CREATED);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<VtuberDTOSend> get(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(vtuberService.findById(id));
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<VtuberDTOSend> update(@PathVariable("id") UUID id, @Valid @RequestBody VtuberDTOReceive vtuberDTOReceive) {
         return ResponseEntity.ok(vtuberService.update(id, vtuberDTOReceive));
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Boolean> delete(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(vtuberService.delete(id));
     }

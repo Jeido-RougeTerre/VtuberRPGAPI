@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/users/")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
@@ -32,17 +32,17 @@ public class UserController {
         return new ResponseEntity<>(userService.create(userDTOReceive), HttpStatus.CREATED);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserDTOSend> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.findById(id));
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<UserDTOSend> update(@PathVariable UUID id, @RequestBody @Valid UserDTOReceive userDTOReceive) {
         return ResponseEntity.ok(userService.update(id, userDTOReceive));
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Boolean> delete(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.delete(id));
     }
