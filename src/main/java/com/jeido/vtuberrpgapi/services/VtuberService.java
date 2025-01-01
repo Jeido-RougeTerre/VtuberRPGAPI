@@ -23,7 +23,19 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
     public VtuberDTOSend toDTOSend(Vtuber vtuber) {
         return VtuberDTOSend.builder()
                 .id(vtuber.getId())
-                .name(vtuber.getName())
+                .title(vtuber.getTitle())
+                .thumbnailPath(vtuber.getThumbnailPath())
+                .version(vtuber.getVersion())
+                .author(vtuber.getAuthor())
+                .contact(vtuber.getContact())
+                .reference(vtuber.getReference())
+                .performer(vtuber.getPerformer())
+                .allowViolent(vtuber.isAllowViolent())
+                .allowSexual(vtuber.isAllowSexual())
+                .allowCommercial(vtuber.isAllowCommercial())
+                .otherLicenseUrl(vtuber.getOtherLicenseUrl())
+                .redistribution(vtuber.getRedistribution())
+                .otherRedistributionUrl(vtuber.getOtherRedistributionLicenseUrl())
                 .userIds(vtuber.getUsers().stream().map(User::getId).toList())
                 .stats(statService.toDTOSendLess(vtuber.getStats()))
                 .triggers(triggerService.toDTOLess(vtuber.getTriggers()))
@@ -50,21 +62,40 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
     public VtuberDTOSend create(VtuberDTOReceive vtuberDTOReceive) {
 
         return toDTOSend(vtuberRepository.save(Vtuber.builder()
-                        .name(vtuberDTOReceive.getName())
-                        .users(new ArrayList<>())
-                        .stats(new ArrayList<>())
-                        .triggers(new ArrayList<>())
+                .title(vtuberDTOReceive.getTitle())
+                .thumbnailPath(vtuberDTOReceive.getThumbnailPath())
+                .version(vtuberDTOReceive.getVersion())
+                .author(vtuberDTOReceive.getAuthor() == null ? "no-author" : vtuberDTOReceive.getAuthor())
+                .contact(vtuberDTOReceive.getContact())
+                .reference(vtuberDTOReceive.getReference())
+                .performer(vtuberDTOReceive.getPerformer())
+                .allowViolent(vtuberDTOReceive.isAllowViolent())
+                .allowSexual(vtuberDTOReceive.isAllowSexual())
+                .allowCommercial(vtuberDTOReceive.isAllowCommercial())
+                .otherLicenseUrl(vtuberDTOReceive.getOtherLicenseUrl())
+                .redistribution(vtuberDTOReceive.getRedistribution())
+                .otherRedistributionLicenseUrl(vtuberDTOReceive.getOtherRedistributionUrl())
                 .build()));
     }
 
     public VtuberDTOSend create(VtuberDTOReceive vtuberDTOReceive, UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserIdNotFoundException(userId));
         return toDTOSend(vtuberRepository.save(Vtuber.builder()
-                .name(vtuberDTOReceive.getName())
-                .users(
-                        Collections.singletonList(userRepository.findById(userId)
-                                .orElseThrow(() -> new UserIdNotFoundException(userId))
-                        )
-                )
+                .title(vtuberDTOReceive.getTitle())
+                .thumbnailPath(vtuberDTOReceive.getThumbnailPath())
+                .version(vtuberDTOReceive.getVersion())
+                .author(vtuberDTOReceive.getAuthor() == null ? user.getUsername() : vtuberDTOReceive.getAuthor())
+                .contact(vtuberDTOReceive.getContact())
+                .reference(vtuberDTOReceive.getReference())
+                .performer(vtuberDTOReceive.getPerformer())
+                .allowViolent(vtuberDTOReceive.isAllowViolent())
+                .allowSexual(vtuberDTOReceive.isAllowSexual())
+                .allowCommercial(vtuberDTOReceive.isAllowCommercial())
+                .otherLicenseUrl(vtuberDTOReceive.getOtherLicenseUrl())
+                .redistribution(vtuberDTOReceive.getRedistribution())
+                .otherRedistributionLicenseUrl(vtuberDTOReceive.getOtherRedistributionUrl())
+                .users(Collections.singletonList(user))
                 .build()
         ));
     }
@@ -84,8 +115,56 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
 
         Vtuber vtuber = vtuberRepository.findById(id).orElseThrow(() -> new VtuberIdNotFoundException(id));
 
-        if (vtuberDTOReceive.getName() != null && !vtuberDTOReceive.getName().equals(vtuber.getName())) {
-            vtuber.setName(vtuberDTOReceive.getName());
+        if (vtuberDTOReceive.getTitle() != null && !vtuberDTOReceive.getTitle().equals(vtuber.getTitle())) {
+            vtuber.setTitle(vtuberDTOReceive.getTitle());
+        }
+
+        if (vtuberDTOReceive.getThumbnailPath() != null && !vtuberDTOReceive.getThumbnailPath().isEmpty() && !vtuberDTOReceive.getThumbnailPath().equals(vtuber.getThumbnailPath())) {
+            vtuber.setThumbnailPath(vtuberDTOReceive.getThumbnailPath());
+        }
+
+        if (vtuberDTOReceive.getVersion() != null && !vtuberDTOReceive.getVersion().isEmpty() && !vtuberDTOReceive.getVersion().equals(vtuber.getVersion())) {
+            vtuber.setVersion(vtuberDTOReceive.getVersion());
+        }
+
+        if (vtuberDTOReceive.getAuthor() != null && !vtuberDTOReceive.getAuthor().isEmpty() && !vtuberDTOReceive.getAuthor().equals(vtuber.getAuthor())) {
+            vtuber.setAuthor(vtuberDTOReceive.getAuthor());
+        }
+
+        if (vtuberDTOReceive.getContact() != null && !vtuberDTOReceive.getContact().isEmpty() && !vtuberDTOReceive.getContact().equals(vtuber.getContact())) {
+            vtuber.setContact(vtuberDTOReceive.getContact());
+        }
+
+        if (vtuberDTOReceive.getReference() != null && !vtuberDTOReceive.getReference().isEmpty() && !vtuberDTOReceive.getReference().equals(vtuber.getReference())) {
+            vtuber.setReference(vtuberDTOReceive.getReference());
+        }
+
+        if (vtuberDTOReceive.getPerformer() != null && !vtuberDTOReceive.getPerformer().equals(vtuber.getPerformer())) {
+            vtuber.setPerformer(vtuberDTOReceive.getPerformer());
+        }
+
+        if (vtuberDTOReceive.isAllowViolent() != vtuber.isAllowViolent()) {
+            vtuber.setAllowViolent(vtuberDTOReceive.isAllowViolent());
+        }
+
+        if (vtuberDTOReceive.isAllowSexual() != vtuber.isAllowSexual()) {
+            vtuber.setAllowSexual(vtuber.isAllowSexual());
+        }
+
+        if (vtuberDTOReceive.isAllowCommercial() != vtuber.isAllowCommercial()) {
+            vtuber.setAllowCommercial(vtuberDTOReceive.isAllowCommercial());
+        }
+
+        if (vtuberDTOReceive.getOtherLicenseUrl() != null && !vtuberDTOReceive.getOtherLicenseUrl().isEmpty() && !vtuberDTOReceive.getOtherLicenseUrl().equals(vtuber.getOtherLicenseUrl())) {
+            vtuber.setOtherLicenseUrl(vtuberDTOReceive.getOtherLicenseUrl());
+        }
+
+        if (vtuberDTOReceive.getRedistribution() != null && !vtuberDTOReceive.getRedistribution().equals(vtuber.getRedistribution())) {
+            vtuber.setRedistribution(vtuberDTOReceive.getRedistribution());
+        }
+
+        if (vtuberDTOReceive.getOtherRedistributionUrl() != null && !vtuberDTOReceive.getOtherRedistributionUrl().isEmpty() && !vtuberDTOReceive.getOtherRedistributionUrl().equals(vtuber.getOtherRedistributionLicenseUrl())) {
+            vtuber.setOtherRedistributionLicenseUrl(vtuberDTOReceive.getOtherRedistributionUrl());
         }
 
         if (vtuberDTOReceive.getUserIds() != null) {
@@ -112,7 +191,7 @@ public class VtuberService implements BaseService<VtuberDTOReceive, VtuberDTOSen
     }
 
     public List<VtuberDTOSend> findAllByName(String name) {
-        return toDTOSend(vtuberRepository.findAllByNameContainingIgnoreCase(name));
+        return toDTOSend(vtuberRepository.findAllByTitleContainingIgnoreCase(name));
     }
 
     public List<VtuberDTOSend> findAllByUserId(UUID id) {

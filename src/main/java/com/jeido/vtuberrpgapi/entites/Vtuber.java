@@ -1,5 +1,7 @@
 package com.jeido.vtuberrpgapi.entites;
 
+import com.jeido.vtuberrpgapi.utils.enums.LicenseType;
+import com.jeido.vtuberrpgapi.utils.enums.Performer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,10 +23,32 @@ public class Vtuber {
     @Column(name = "vtuber_id")
     private UUID id;
 
-    private String name;
+    private String title;
+
+    private String thumbnailPath = "no-icon.png";
+
+    private String version = "unknown";
+
+    private String author = "no-author";
+
+    private String contact = "";
+
+    private String reference = "";
+
+    private Performer performer = Performer.ONLY_AUTHOR;
+
+    private boolean allowViolent = false;
+    private boolean allowSexual = false;
+    private boolean allowCommercial = false;
+
+    private String otherLicenseUrl = "";
+
+    private LicenseType redistribution = LicenseType.REDISTRIBUTION_PROHIBITED;
+    private String otherRedistributionLicenseUrl = "";
+
 
     @ManyToMany
-    @JoinTable(name = "impersonations",
+    @JoinTable(name = "impersonation",
             joinColumns = @JoinColumn(name = "vtuber_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )

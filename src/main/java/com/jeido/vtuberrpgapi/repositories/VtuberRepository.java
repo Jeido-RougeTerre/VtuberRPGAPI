@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface VtuberRepository extends CrudRepository<Vtuber, UUID> {
-    List<Vtuber> findAllByNameContainingIgnoreCase(String name);
+    List<Vtuber> findAllByTitleContainingIgnoreCase(String name);
     List<Vtuber> findAllByUsersContaining(User user);
 
     @Query("SELECT v FROM Vtuber v WHERE size(v.users) = :size")
